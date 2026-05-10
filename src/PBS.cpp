@@ -305,7 +305,8 @@ double PBS::get_path_cost(const Path& path) const
         {
             travel_time += travel_times.at(path[i].location);
         }
-        cost += G.get_weight(path[i].location, path[i + 1].location) * travel_time;
+        cost += G.get_weight(path[i].location, path[i + 1].location) * travel_time +
+                path_planner.get_learned_cost(path[i + 1].location);
     }
     return cost;
 }

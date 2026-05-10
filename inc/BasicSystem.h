@@ -6,6 +6,8 @@
 #include "WHCAStar.h"
 #include "ECBS.h"
 #include "LRAStar.h"
+#include <cstdio>
+#include <sys/types.h>
 
 
 class BasicSystem
@@ -27,6 +29,15 @@ public:
     int simulation_window;
     int planning_window;
     int simulation_time;
+    bool use_learned_cost = false;
+    std::string learned_cost_ckpt;
+    std::string learned_cost_python = "python3";
+    int learned_cost_history_len = 5;
+    double learned_cost_weight = 1.0;
+    double gaussian_sigma = 1.5;
+    double pred_bias = 0.0;
+    int gaussian_ksize = 9;
+    bool learned_cost_normalize = false;
 
     // params for drive model
     bool consider_rotation;
@@ -67,6 +78,7 @@ public:
     // update
     void update_start_locations();
     void update_travel_times(unordered_map<int, double>& travel_times);
+    bool update_learned_costs();
     void update_paths(const std::vector<Path*>& MAPF_paths, int max_timestep);
     void update_paths(const std::vector<Path>& MAPF_paths, int max_timestep);
     void update_initial_paths(vector<Path>& initial_paths) const;
@@ -87,5 +99,19 @@ protected:
 
 private:
 	const BasicGraph& G;
+    bool run_learned_cost_inference(const std::string& input_file, const std::string& output_file) const;
+    bool start_learned_cost_worker();
+    void stop_learned_cost_worker();
+    bool infer_learned_cost_via_worker(
+        const std::vector<int>& obstacles,
+        const std::vector<float>& occupancy,
+        const std::vector<float>& vertical,
+        const std::vector<float>& horizontal,
+        int rows,
+        int cols,
+        int history_len,
+        std::vector<double>& costs);
+    pid_t learned_cost_worker_pid = -1;
+    FILE* learned_cost_worker_in = nullptr;
+    FILE* learned_cost_worker_out = nullptr;
 };
-

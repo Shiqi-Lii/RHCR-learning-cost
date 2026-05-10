@@ -99,7 +99,8 @@ Path LRAStar::find_shortest_path(const State& start, const vector<pair<int, int>
 			if (curr->state.location == next_state.location && curr->state.orientation == next_state.orientation)
 				continue;
 			// compute cost to next_id via curr node
-			double next_g_val = curr->g_val + G.get_weight(curr->state.location, next_state.location) * travel_time;
+			double next_g_val = curr->g_val + G.get_weight(curr->state.location, next_state.location) * travel_time +
+                                path_planner.get_learned_cost(next_state.location);
 			double next_h_val = path_planner.compute_h_value(G, next_state.location, curr->goal_id, goal_locations);
 			if (next_h_val >= INT_MAX) // This vertex cannot reach the goal vertex
 				continue;

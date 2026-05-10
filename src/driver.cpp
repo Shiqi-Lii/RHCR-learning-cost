@@ -17,6 +17,15 @@ void set_parameters(BasicSystem& system, const boost::program_options::variables
 	system.simulation_window = vm["simulation_window"].as<int>();
 	system.planning_window = vm["planning_window"].as<int>();
 	system.travel_time_window = vm["travel_time_window"].as<int>();
+    system.use_learned_cost = vm["use_learned_cost"].as<bool>();
+    system.learned_cost_ckpt = vm["learned_cost_ckpt"].as<std::string>();
+    system.learned_cost_python = vm["learned_cost_python"].as<std::string>();
+    system.learned_cost_history_len = vm["learned_cost_history_len"].as<int>();
+    system.learned_cost_weight = vm["learned_cost_weight"].as<double>();
+    system.gaussian_sigma = vm["gaussian_sigma"].as<double>();
+    system.pred_bias = vm["pred_bias"].as<double>();
+    system.gaussian_ksize = vm["gaussian_ksize"].as<int>();
+    system.learned_cost_normalize = vm["learned_cost_normalize"].as<bool>();
 	system.consider_rotation = vm["rotation"].as<bool>();
 	system.k_robust = vm["robust"].as<int>();
 	system.hold_endpoints = vm["hold_endpoints"].as<bool>();
@@ -131,6 +140,15 @@ int main(int argc, char** argv)
 		("prioritize_start", po::value<bool>()->default_value(true), "Prioritize waiting at start locations")
 		("suboptimal_bound", po::value<double>()->default_value(1), "Suboptimal bound for ECBS")
 		("log", po::value<bool>()->default_value(false), "save the search trees (and the priority trees)")
+        ("use_learned_cost", po::value<bool>()->default_value(false), "enable learned costmap inference from checkpoint")
+        ("learned_cost_ckpt", po::value<std::string>()->default_value(""), "path to learned costmap checkpoint (.pt)")
+        ("learned_cost_python", po::value<std::string>()->default_value("python3"), "python executable for learned-cost bridge")
+        ("learned_cost_history_len", po::value<int>()->default_value(5), "history length for learned cost inference")
+        ("learned_cost_weight", po::value<double>()->default_value(1.0), "learned cost weight (C multiplier)")
+        ("gaussian_sigma", po::value<double>()->default_value(1.5), "gaussian sigma for learned cost smoothing")
+        ("pred_bias", po::value<double>()->default_value(0.0), "bias added to predicted learned cost")
+        ("gaussian_ksize", po::value<int>()->default_value(9), "gaussian kernel size (odd)")
+        ("learned_cost_normalize", po::value<bool>()->default_value(false), "normalize learned cost by max before bias")
 		;
 	clock_t start_time = clock();
 	po::variables_map vm;
@@ -142,6 +160,12 @@ int main(int argc, char** argv)
 	}
 
 	po::notify(vm);
+
+    if (vm["use_learned_cost"].as<bool>() && vm["learned_cost_ckpt"].as<std::string>().empty())
+    {
+        std::cerr << "--learned_cost_ckpt is required when --use_learned_cost=true" << endl;
+        return -1;
+    }
 
     // check params
     if (vm["hold_endpoints"].as<bool>() or vm["dummy_paths"].as<bool>())

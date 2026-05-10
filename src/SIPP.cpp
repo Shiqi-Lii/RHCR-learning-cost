@@ -347,8 +347,9 @@ void SIPP::generate_node(const Interval& interval, SIPPNode* curr, const BasicGr
 {
     int timestep  = max(std::get<0>(interval), min_timestep);
     int wait_time = timestep - curr->state.timestep - 1; // inlcude rotate time
-    double g_val = curr->g_val + wait_time * G.get_weight(curr->state.location, curr->state.location)
-                   + G.get_weight(curr->state.location, location);
+    double g_val = curr->g_val + wait_time * (G.get_weight(curr->state.location, curr->state.location) +
+                   get_learned_cost(curr->state.location)) + G.get_weight(curr->state.location, location) +
+                   get_learned_cost(location);
 
     int conflicts = std::get<2>(interval) + curr->conflicts;
 
@@ -452,7 +453,6 @@ inline void SIPP::releaseClosedListNodes()
         delete (*it);
     allNodes_table.clear();
 }
-
 
 
 

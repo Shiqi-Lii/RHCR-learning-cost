@@ -102,7 +102,8 @@ Path StateTimeAStar::run(const BasicGraph& G, const State& start,
             if (!rt.isConstrained(curr->state.location, next_state.location, next_state.timestep))
             {
                 // compute cost to next_id via curr node
-                double next_g_val = curr->g_val + G.get_weight(curr->state.location, next_state.location);
+                double next_g_val = curr->g_val + G.get_weight(curr->state.location, next_state.location) +
+                                    get_learned_cost(next_state.location);
                 double next_h_val = compute_h_value(G, next_state.location, curr->goal_id, goal_location);
                 if (next_h_val >= INT_MAX) // This vertex cannot reach the goal vertex
                     continue;
@@ -196,7 +197,7 @@ Path StateTimeAStar::run(const BasicGraph& G, const State& start,
             for (int t : timesteps)
             {
                 State s(start.location, t, start.orientation);
-                auto node2 = new StateTimeAStarNode(s, t * wait_cost, h, root, 0);
+                auto node2 = new StateTimeAStarNode(s, t * (wait_cost + get_learned_cost(start.location)), h, root, 0);
                 num_generated++;
                 node2->open_handle = open_list.push(node2);
                 node2->in_openlist = true;
@@ -286,7 +287,8 @@ void StateTimeAStar::findTrajectory(const BasicGraph& G,
             if (curr->state.location == next_state.location && curr->state.orientation == next_state.orientation)
                 continue;
             // compute cost to next_id via curr node
-            double next_g_val = curr->g_val + G.get_weight(curr->state.location, next_state.location) * travel_time;
+            double next_g_val = curr->g_val + G.get_weight(curr->state.location, next_state.location) * travel_time +
+                                get_learned_cost(next_state.location);
             double next_h_val = compute_h_value(G, next_state.location, curr->goal_id, goal_locations);
             if (next_h_val >= INT_MAX) // This vertex cannot reach the goal vertex
                 continue;

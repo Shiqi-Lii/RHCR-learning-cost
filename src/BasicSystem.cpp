@@ -1,11 +1,20 @@
 #include "BasicSystem.h"
 #include <stdlib.h>
 #include <boost/tokenizer.hpp>
+#include <fstream>
+#include <sstream>
+#include <iostream>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <signal.h>
 
 
 BasicSystem::BasicSystem(const BasicGraph& G, MAPFSolver& solver): G(G), solver(solver), num_of_tasks(0) {}
 
-BasicSystem::~BasicSystem() {}
+BasicSystem::~BasicSystem()
+{
+    stop_learned_cost_worker();
+}
 
 
 // TODO: implement the random instance generator
@@ -478,7 +487,7 @@ void BasicSystem::save_results()
     output.close();
 
     // tasks
-    output.open(outfile + "\\tasks.txt", std::ios::out);
+    output.open(outfile + "/tasks.txt", std::ios::out);
     output << num_of_drives << std::endl;
     for (int k = 0; k < num_of_drives; k++)
     {
@@ -500,7 +509,7 @@ void BasicSystem::save_results()
     output.close();
 
     // paths
-    output.open(outfile + "\\paths.txt", std::ios::out);
+    output.open(outfile + "/paths.txt", std::ios::out);
     output << num_of_drives << std::endl;
     for (int k = 0; k < num_of_drives; k++)
     {
@@ -563,6 +572,229 @@ void BasicSystem::update_travel_times(unordered_map<int, double>& travel_times)
     }
 }
 
+bool BasicSystem::run_learned_cost_inference(const std::string& input_file, const std::string& output_file) const
+{
+    std::stringstream cmd;
+    cmd << learned_cost_python << " scripts/learned_cost_infer.py"
+        << " --ckpt \"" << learned_cost_ckpt << "\""
+        << " --input \"" << input_file << "\""
+        << " --output \"" << output_file << "\""
+        << " --weight " << learned_cost_weight
+        << " --gaussian_sigma " << gaussian_sigma
+        << " --pred_bias " << pred_bias
+        << " --gaussian_ksize " << gaussian_ksize;
+    if (learned_cost_normalize)
+        cmd << " --normalize";
+    return std::system(cmd.str().c_str()) == 0;
+}
+
+bool BasicSystem::start_learned_cost_worker()
+{
+    if (learned_cost_worker_in != nullptr && learned_cost_worker_out != nullptr && learned_cost_worker_pid > 0)
+    {
+        if (kill(learned_cost_worker_pid, 0) == 0)
+            return true;
+        stop_learned_cost_worker();
+    }
+
+    int to_child[2];
+    int from_child[2];
+    if (pipe(to_child) != 0 || pipe(from_child) != 0)
+        return false;
+
+    pid_t pid = fork();
+    if (pid < 0)
+    {
+        close(to_child[0]); close(to_child[1]);
+        close(from_child[0]); close(from_child[1]);
+        return false;
+    }
+    if (pid == 0)
+    {
+        dup2(to_child[0], STDIN_FILENO);
+        dup2(from_child[1], STDOUT_FILENO);
+        close(to_child[0]); close(to_child[1]);
+        close(from_child[0]); close(from_child[1]);
+
+        std::stringstream cmd;
+        cmd << learned_cost_python << " scripts/learned_cost_infer.py"
+            << " --server"
+            << " --ckpt \"" << learned_cost_ckpt << "\""
+            << " --weight " << learned_cost_weight
+            << " --gaussian_sigma " << gaussian_sigma
+            << " --pred_bias " << pred_bias
+            << " --gaussian_ksize " << gaussian_ksize;
+        if (learned_cost_normalize)
+            cmd << " --normalize";
+        execl("/bin/bash", "bash", "-lc", cmd.str().c_str(), (char*) nullptr);
+        _exit(127);
+    }
+
+    close(to_child[0]);
+    close(from_child[1]);
+    learned_cost_worker_in = fdopen(to_child[1], "w");
+    learned_cost_worker_out = fdopen(from_child[0], "r");
+    learned_cost_worker_pid = pid;
+    if (learned_cost_worker_in == nullptr || learned_cost_worker_out == nullptr)
+    {
+        stop_learned_cost_worker();
+        return false;
+    }
+    return true;
+}
+
+void BasicSystem::stop_learned_cost_worker()
+{
+    if (learned_cost_worker_in != nullptr)
+    {
+        fprintf(learned_cost_worker_in, "QUIT\n");
+        fflush(learned_cost_worker_in);
+    }
+    if (learned_cost_worker_in != nullptr)
+    {
+        fclose(learned_cost_worker_in);
+        learned_cost_worker_in = nullptr;
+    }
+    if (learned_cost_worker_out != nullptr)
+    {
+        fclose(learned_cost_worker_out);
+        learned_cost_worker_out = nullptr;
+    }
+    if (learned_cost_worker_pid > 0)
+    {
+        int status = 0;
+        waitpid(learned_cost_worker_pid, &status, 0);
+        learned_cost_worker_pid = -1;
+    }
+}
+
+bool BasicSystem::infer_learned_cost_via_worker(
+    const std::vector<int>& obstacles,
+    const std::vector<float>& occupancy,
+    const std::vector<float>& vertical,
+    const std::vector<float>& horizontal,
+    int rows,
+    int cols,
+    int history_len,
+    std::vector<double>& costs)
+{
+    if (!start_learned_cost_worker())
+        return false;
+    if (learned_cost_worker_in == nullptr || learned_cost_worker_out == nullptr)
+        return false;
+
+    const int map_size = rows * cols;
+    fprintf(learned_cost_worker_in, "INFER %d %d %d\n", rows, cols, history_len);
+    for (int i = 0; i < map_size; i++)
+        fprintf(learned_cost_worker_in, i + 1 == map_size ? "%d\n" : "%d ", obstacles[i]);
+
+    for (int i = 0; i < history_len * map_size; i++)
+        fprintf(learned_cost_worker_in, ((i + 1) % map_size == 0) ? "%.8g\n" : "%.8g ", occupancy[i]);
+    for (int i = 0; i < history_len * map_size; i++)
+        fprintf(learned_cost_worker_in, ((i + 1) % map_size == 0) ? "%.8g\n" : "%.8g ", vertical[i]);
+    for (int i = 0; i < history_len * map_size; i++)
+        fprintf(learned_cost_worker_in, ((i + 1) % map_size == 0) ? "%.8g\n" : "%.8g ", horizontal[i]);
+    fflush(learned_cost_worker_in);
+
+    char status_line[1024];
+    if (fgets(status_line, sizeof(status_line), learned_cost_worker_out) == nullptr)
+    {
+        stop_learned_cost_worker();
+        return false;
+    }
+    std::string status(status_line);
+    if (status.rfind("OK", 0) != 0)
+    {
+        stop_learned_cost_worker();
+        return false;
+    }
+
+    int r = 0, c = 0;
+    std::stringstream ss(status);
+    std::string ok;
+    ss >> ok >> r >> c;
+    if (r != rows || c != cols)
+    {
+        stop_learned_cost_worker();
+        return false;
+    }
+
+    costs.assign(map_size, 0.0);
+    for (int i = 0; i < map_size; i++)
+    {
+        if (fscanf(learned_cost_worker_out, "%lf", &costs[i]) != 1)
+        {
+            stop_learned_cost_worker();
+            return false;
+        }
+    }
+    int ch = fgetc(learned_cost_worker_out);
+    (void) ch;
+    return true;
+}
+
+bool BasicSystem::update_learned_costs()
+{
+    if (!use_learned_cost)
+        return false;
+    if (learned_cost_ckpt.empty())
+        return false;
+
+    const int rows = G.get_rows();
+    const int cols = G.get_cols();
+    const int map_size = rows * cols;
+    const int history_len = std::max(1, learned_cost_history_len);
+    const int t_start = std::max(0, timestep - history_len + 1);
+
+    std::vector<int> obstacles(map_size, 0);
+    for (int i = 0; i < map_size; i++)
+        obstacles[i] = (G.types[i] == "Obstacle" ? 1 : 0);
+    std::vector<float> occupancy(history_len * map_size, 0.0f);
+    std::vector<float> vertical(history_len * map_size, 0.0f);
+    std::vector<float> horizontal(history_len * map_size, 0.0f);
+
+    for (int frame = 0; frame < history_len; frame++)
+    {
+        int t = t_start + frame;
+        int offset = frame * map_size;
+        if (t <= timestep)
+        {
+            for (int k = 0; k < num_of_drives; k++)
+            {
+                if (t >= (int) paths[k].size())
+                    continue;
+                int loc = paths[k][t].location;
+                if (loc < 0 || loc >= map_size)
+                    continue;
+                occupancy[offset + loc] += 1.0f;
+                if (t > 0 && (t - 1) < (int) paths[k].size())
+                {
+                    int prev = paths[k][t - 1].location;
+                    if (prev >= 0 && prev < map_size)
+                    {
+                        int dr = loc / cols - prev / cols;
+                        int dc = loc % cols - prev % cols;
+                        if (dr < 0)
+                            vertical[offset + prev] -= 1.0f;
+                        else if (dr > 0)
+                            vertical[offset + prev] += 1.0f;
+                        else if (dc < 0)
+                            horizontal[offset + prev] -= 1.0f;
+                        else if (dc > 0)
+                            horizontal[offset + prev] += 1.0f;
+                    }
+                }
+            }
+        }
+    }
+    vector<double> costs(map_size, 0);
+    if (!infer_learned_cost_via_worker(obstacles, occupancy, vertical, horizontal, rows, cols, history_len, costs))
+        return false;
+    solver.path_planner.learned_costs = costs;
+    solver.path_planner.use_learned_cost = true;
+    return true;
+}
+
 
 void BasicSystem::solve()
 {
@@ -571,6 +803,16 @@ void BasicSystem::solve()
 	lra.simulation_window = simulation_window;
 	lra.k_robust = k_robust;
 	solver.clear();
+    if (use_learned_cost)
+    {
+        if (!update_learned_costs())
+            std::cerr << "Warning: learned cost inference failed at timestep " << timestep << ". Fallback to base costs." << std::endl;
+    }
+    else
+    {
+        solver.path_planner.use_learned_cost = false;
+        solver.path_planner.learned_costs.clear();
+    }
 	if (solver.get_name() == "LRA")
 	{
 		// predict travel time
@@ -824,4 +1066,3 @@ bool BasicSystem::load_records()
 	myfile.close();
 	return true;
 }
-

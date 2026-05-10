@@ -22,6 +22,15 @@ public:
     int num_of_conf; // number of conflicts between this agent to all the other agents
 
 	unordered_map<int, double> travel_times;
+    bool use_learned_cost = false;
+    vector<double> learned_costs;
+
+    inline double get_learned_cost(int location) const
+    {
+        if (!use_learned_cost || location < 0 || location >= (int) learned_costs.size())
+            return 0.0;
+        return learned_costs[location];
+    }
 
 	double compute_h_value(const BasicGraph& G, int curr, int goal_id,
 		const vector<pair<int, int> >& goal_location) const;
