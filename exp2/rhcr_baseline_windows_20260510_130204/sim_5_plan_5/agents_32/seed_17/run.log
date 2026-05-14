@@ -1,0 +1,167 @@
+*** Loading map ***
+Map size: 33x46 with 480 endpoints and 192 home stations.
+Done! (0 s)
+*** PreProcessing map ***
+Done! (0 s)
+*** Simulating 17 ***
+Randomly generating initial locations
+Timestep 0
+PBS:Succeed,0.001484,5,10,1142,1141,36.6875,7,0.001039,8.7e-05,1e-05,4e-06,0.000237,4e-06,1e-06,0.000372,1.1e-05
+0 tasks has been finished
+Timestep 5
+PBS:Succeed,0.001191,4,8,1018,1018,32.8125,7,0.000808,7.2e-05,7e-06,3e-06,0.000235,1e-06,0,0.000287,4e-06
+1 tasks has been finished
+Timestep 10
+PBS:Succeed,0.001278,6,12,878,876,28.4375,6,0.000804,8.1e-05,4e-06,5e-06,0.000264,8e-06,2e-06,0.00046,1e-05
+1 tasks has been finished
+Timestep 15
+PBS:Succeed,0.000867,2,4,823,822,26.7188,2,0.000564,5.5e-05,8e-06,0,0.000201,2e-06,0,0.000108,1e-06
+3 tasks has been finished
+Timestep 20
+PBS:Succeed,0.000905,4,8,715,711,23.3438,4,0.00053,6.8e-05,7e-06,3e-06,0.000224,3e-06,0,0.000217,7e-06
+2 tasks has been finished
+Timestep 25
+PBS:Succeed,0.001031,6,12,640,632,21,6,0.000567,8.5e-05,1e-05,6e-06,0.000255,5e-06,0,0.000385,1e-05
+3 tasks has been finished
+Timestep 30
+PBS:Succeed,0.001848,13,26,576,559,19,14,0.000906,0.000178,1.7e-05,1.8e-05,0.000388,1.6e-05,4e-06,0.001198,5.4e-05
+3 tasks has been finished
+Timestep 35
+PBS:Succeed,0.001108,8,16,563,552,18.5938,9,0.000575,9.7e-05,1e-05,8e-06,0.000283,6e-06,1e-06,0.000485,1.7e-05
+6 tasks has been finished
+Timestep 40
+PBS:Succeed,0.001048,7,15,561,549,18.5312,13,0.000517,9.6e-05,1e-05,7e-06,0.00028,7e-06,1e-06,0.000421,1.7e-05
+7 tasks has been finished
+Timestep 45
+PBS:Succeed,0.001197,8,16,569,560,18.7812,13,0.000639,0.000107,1.3e-05,5e-06,0.000274,9e-06,3e-06,0.000563,2.1e-05
+8 tasks has been finished
+Timestep 50
+PBS:Succeed,0.00106,7,14,610,596,20.0625,8,0.000568,9.3e-05,1.3e-05,7e-06,0.00027,8e-06,1e-06,0.000408,1.1e-05
+9 tasks has been finished
+Timestep 55
+PBS:Succeed,0.001579,12,24,535,518,17.7188,11,0.000792,0.000145,2e-05,1.4e-05,0.000358,1.4e-05,3e-06,0.000965,3.5e-05
+4 tasks has been finished
+Timestep 60
+PBS:Succeed,0.000951,6,12,530,518,17.5625,7,0.000496,8.4e-05,1.2e-05,3e-06,0.000257,7e-06,2e-06,0.000343,1.3e-05
+10 tasks has been finished
+Timestep 65
+PBS:Succeed,0.001668,14,28,515,500,17.0938,14,0.000818,0.000161,2.1e-05,1.9e-05,0.000395,1.6e-05,1e-06,0.001052,3.9e-05
+6 tasks has been finished
+Timestep 70
+PBS:Succeed,0.001741,13,26,567,549,18.7188,20,0.000898,0.000155,1.5e-05,1.4e-05,0.000376,1.6e-05,0,0.001092,4.9e-05
+9 tasks has been finished
+Timestep 75
+PBS:Succeed,0.001454,9,18,634,621,20.8125,14,0.000724,0.000124,1.3e-05,1.2e-05,0.000363,1e-05,2e-06,0.000774,3.3e-05
+7 tasks has been finished
+Timestep 80
+PBS:Succeed,0.000966,5,10,620,616,20.375,5,0.000529,7.9e-05,1.1e-05,2e-06,0.000245,6e-06,3e-06,0.000316,1e-05
+8 tasks has been finished
+Timestep 85
+PBS:Succeed,0.001333,10,20,637,629,20.9062,12,0.000679,0.000124,1.4e-05,1e-05,0.000312,1.1e-05,1e-06,0.000649,2.5e-05
+9 tasks has been finished
+Timestep 90
+PBS:Succeed,0.001227,7,15,583,570,19.2188,11,0.000643,0.000102,9e-06,5e-06,0.000299,1.6e-05,2e-06,0.000592,2.2e-05
+5 tasks has been finished
+Timestep 95
+PBS:Succeed,0.001824,14,28,539,521,17.8438,19,0.000857,0.000182,2.1e-05,1.9e-05,0.000406,1.2e-05,1e-06,0.001189,6e-05
+5 tasks has been finished
+Timestep 100
+PBS:Succeed,0.000821,4,8,530,525,17.5625,6,0.000435,7.3e-05,6e-06,3e-06,0.000233,2e-06,1e-06,0.000228,5e-06
+7 tasks has been finished
+Timestep 105
+PBS:Succeed,0.001365,9,18,631,620,20.7188,9,0.000719,0.000119,1.3e-05,9e-06,0.000309,1e-05,3e-06,0.000676,2.1e-05
+10 tasks has been finished
+Timestep 110
+PBS:Succeed,0.00099,6,12,644,639,21.125,9,0.000529,8e-05,1e-05,3e-06,0.000253,5e-06,2e-06,0.00032,1.2e-05
+9 tasks has been finished
+Timestep 115
+PBS:Succeed,0.001042,6,12,657,650,21.5312,7,0.000585,8e-05,9e-06,5e-06,0.00025,5e-06,0,0.000372,7e-06
+8 tasks has been finished
+Timestep 120
+PBS:Succeed,0.001304,9,18,680,665,22.25,11,0.000721,0.000112,1.4e-05,1e-05,0.000293,1.1e-05,1e-06,0.000609,2.2e-05
+7 tasks has been finished
+Timestep 125
+PBS:Succeed,0.00173,11,23,586,571,19.3125,17,0.000868,0.000151,1.5e-05,1.5e-05,0.000383,1.1e-05,1e-06,0.001102,4.8e-05
+2 tasks has been finished
+Timestep 130
+PBS:Succeed,0.001308,8,16,542,525,17.9375,10,0.00066,0.000124,1.5e-05,8e-06,0.00031,7e-06,1e-06,0.00071,2.1e-05
+5 tasks has been finished
+Timestep 135
+PBS:Succeed,0.001034,7,14,546,538,18.0625,9,0.000529,9e-05,1.1e-05,4e-06,0.000261,4e-06,0,0.000415,1.1e-05
+8 tasks has been finished
+Timestep 140
+PBS:Succeed,0.000982,7,14,473,465,15.7812,6,0.000468,0.0001,1.2e-05,4e-06,0.000271,7e-06,0,0.000424,1.1e-05
+4 tasks has been finished
+Timestep 145
+PBS:Succeed,0.001226,9,18,599,586,19.7188,9,0.000635,0.000114,1.2e-05,9e-06,0.000306,8e-06,2e-06,0.000571,2.4e-05
+11 tasks has been finished
+Timestep 150
+PBS:Succeed,0.001369,6,12,585,575,19.2812,6,0.000695,0.000123,1.9e-05,6e-06,0.000343,1.1e-05,3e-06,0.00074,1.6e-05
+6 tasks has been finished
+Timestep 155
+PBS:Succeed,0.001185,8,16,629,615,20.6562,11,0.000624,0.0001,9e-06,6e-06,0.000296,3e-06,3e-06,0.000523,2.1e-05
+9 tasks has been finished
+Timestep 160
+PBS:Succeed,0.001372,10,20,634,619,20.8125,12,0.000699,0.000127,1.1e-05,1.2e-05,0.000324,9e-06,3e-06,0.000696,3.4e-05
+6 tasks has been finished
+Timestep 165
+PBS:Succeed,0.001487,13,26,596,586,19.625,16,0.000741,0.000139,1.4e-05,1.7e-05,0.000347,1.1e-05,2e-06,0.000822,3.8e-05
+7 tasks has been finished
+Timestep 170
+PBS:Succeed,0.001247,10,20,550,532,18.1875,10,0.000618,0.000114,1e-05,1.1e-05,0.000308,6e-06,2e-06,0.000637,2.3e-05
+6 tasks has been finished
+Timestep 175
+PBS:Succeed,0.001189,9,18,543,529,17.9688,12,0.000557,0.000107,9e-06,1.3e-05,0.000309,1e-05,0,0.000586,1.8e-05
+6 tasks has been finished
+Timestep 180
+PBS:Succeed,0.001622,12,24,621,610,20.4062,21,0.000833,0.000148,1.2e-05,1e-05,0.000357,1.1e-05,5e-06,0.000943,4.5e-05
+10 tasks has been finished
+Timestep 185
+PBS:Succeed,0.001134,6,12,624,616,20.5,9,0.000617,8.9e-05,9e-06,5e-06,0.000287,5e-06,0,0.000489,1.5e-05
+7 tasks has been finished
+Timestep 190
+PBS:Succeed,0.001468,11,22,569,553,18.7812,11,0.000731,0.00014,1.3e-05,7e-06,0.00034,1.1e-05,2e-06,0.000841,3.7e-05
+3 tasks has been finished
+Timestep 195
+PBS:Succeed,0.000857,3,6,684,678,22.375,4,0.00052,6.2e-05,5e-06,1e-06,0.000219,0,0,0.000165,4e-06
+8 tasks has been finished
+Timestep 200
+PBS:Succeed,0.001017,5,10,743,736,24.2188,5,0.000602,7.9e-05,8e-06,4e-06,0.000237,4e-06,1e-06,0.000288,9e-06
+7 tasks has been finished
+Timestep 205
+PBS:Succeed,0.001806,12,24,752,737,24.5,15,0.00097,0.000147,1.6e-05,1.3e-05,0.000376,1.5e-05,1e-06,0.001057,3.9e-05
+6 tasks has been finished
+Timestep 210
+PBS:Succeed,0.001727,11,23,653,634,21.4062,10,0.000861,0.000166,1.3e-05,1.2e-05,0.000383,1.2e-05,2e-06,0.001056,4e-05
+2 tasks has been finished
+Timestep 215
+PBS:Succeed,0.001305,8,16,643,630,21.0938,11,0.000696,0.000116,1.4e-05,5e-06,0.000312,8e-06,2e-06,0.000643,2.2e-05
+6 tasks has been finished
+Timestep 220
+PBS:Succeed,0.001309,9,19,639,632,20.9688,11,0.000713,0.000109,1.3e-05,9e-06,0.000298,5e-06,1e-06,0.000631,1.8e-05
+6 tasks has been finished
+Timestep 225
+PBS:Succeed,0.001956,16,32,614,599,20.1875,22,0.000953,0.000184,1.8e-05,2.7e-05,0.000416,8e-06,5e-06,0.001264,6.6e-05
+6 tasks has been finished
+Timestep 230
+PBS:Succeed,0.001593,11,23,597,583,19.6562,14,0.000797,0.000149,1.8e-05,1.4e-05,0.00037,1.4e-05,2e-06,0.000934,3.3e-05
+7 tasks has been finished
+Timestep 235
+PBS:Succeed,0.001391,11,22,617,598,20.2812,19,0.000712,0.000123,1.1e-05,1.3e-05,0.000329,1.2e-05,2e-06,0.000736,4.1e-05
+7 tasks has been finished
+Timestep 240
+PBS:Succeed,0.001871,16,32,604,578,19.875,25,0.00091,0.000174,1.2e-05,2.4e-05,0.000398,1.9e-05,4e-06,0.001185,6.6e-05
+8 tasks has been finished
+Timestep 245
+PBS:Succeed,0.001781,17,34,558,533,18.4375,23,0.000826,0.00018,1.8e-05,2.2e-05,0.000397,2e-05,5e-06,0.001129,7.3e-05
+3 tasks has been finished
+Timestep 250
+PBS:Succeed,0.001272,9,18,530,513,17.5625,12,0.000615,0.000122,1.3e-05,8e-06,0.000332,8e-06,3e-06,0.000668,2.7e-05
+6 tasks has been finished
+Timestep 255
+PBS:Succeed,0.001168,7,15,622,610,20.4375,9,0.0006,0.000103,9e-06,6e-06,0.000293,8e-06,0,0.000506,1.6e-05
+8 tasks has been finished
+
+Done!
+*** Saving 17 ***
+Done! (0 s)

@@ -1,0 +1,12 @@
+map: /home/shiqi/masterarbeit/RHCR/maps/wfi_warehouse
+#drives: 128
+seed: 19
+solver: PBS
+time_limit: 60
+simulation_window: 5
+planning_window: 10
+simulation_time: 256
+robust: 0
+rotate: 0
+use_dummy_paths: 0
+hold_endpoints: 0

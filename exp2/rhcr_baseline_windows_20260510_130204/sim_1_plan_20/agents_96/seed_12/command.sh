@@ -1,0 +1,1 @@
+/home/shiqi/masterarbeit/RHCR/lifelong -m /home/shiqi/masterarbeit/RHCR/maps/wfi_warehouse.map --scenario KIVA -k 96 --simulation_window 1 --planning_window 20 --solver PBS --seed 12 --simulation_time 256 --dummy_paths false --use_learned_cost false -o /home/shiqi/masterarbeit/RHCR/exp2/rhcr_baseline_windows_20260510_130204/sim_1_plan_20/agents_96/seed_12
