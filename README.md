@@ -16,6 +16,24 @@ cmake .
 make
 ```
 
+If you clone this repository on a new machine, install the dependencies first:
+```shell script
+sudo apt update
+sudo apt install build-essential cmake libboost-all-dev
+```
+
+Then compile the code:
+```
+cd RHCR
+cmake .
+make -j
+```
+
+You can check whether the executable is available with:
+```
+./lifelong --help
+```
+
 Then, you are able to run the code:
 ```
 ./lifelong -m maps/sorting_map.grid -k 800 --scenario=SORTING --simulation_window=5 --planning_window=10 --solver=PBS --seed=0
@@ -38,6 +56,39 @@ You can find more details and explanations for all parameters with:
 ```
 ./lifelong --help
 ```
+
+### Learned cost extension
+
+This repository also supports running RHCR with a learned cost map. The C++ solver runs on CPU, while the learned cost model is evaluated by the Python bridge in `scripts/learned_cost_infer.py`.
+
+To use learned cost, make sure the Python environment contains PyTorch and NumPy. The current bridge expects `learn-to-follow` to be located next to this repository, for example:
+```
+masterarbeit/
+  RHCR/
+  learn-to-follow/
+```
+
+Example command:
+```
+./lifelong \
+  -m maps/wfi_warehouse.map \
+  --scenario=KIVA \
+  -k 128 \
+  --simulation_window=1 \
+  --planning_window=5 \
+  --solver=PBS \
+  --seed=10 \
+  --simulation_time=256 \
+  --dummy_paths=false \
+  --use_learned_cost=true \
+  --learned_cost_ckpt ../learn-to-follow/costmap/outputs/warehouse_outputs/20260424_133433/best_model.pt \
+  --learned_cost_weight=1.0 \
+  --gaussian_sigma=0.8 \
+  --pred_bias=0.05 \
+  --gaussian_ksize=5
+```
+
+If the heuristics table for a map does not exist, RHCR generates it during preprocessing. For large maps, this first run can take extra time.
 
 ## License
 RHCR is released under USC – Research License. See license.md for further details.
