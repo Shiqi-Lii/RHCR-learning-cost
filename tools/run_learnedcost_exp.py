@@ -2,6 +2,7 @@
 import argparse
 import csv
 import json
+import shutil
 import subprocess
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -41,6 +42,28 @@ def _parse_completed_tasks(tasks_file: Path) -> int:
                 if t >= 0:
                     total += 1
     return total
+
+
+def _parse_solver_times(log_file: Path) -> list[float]:
+    if not log_file.exists():
+        return []
+    times = []
+    for line in log_file.read_text(encoding="utf-8", errors="ignore").splitlines():
+        if ":Succeed," not in line:
+            continue
+        try:
+            payload = line.split(":Succeed,", 1)[1]
+            times.append(float(payload.split(",", 1)[0]))
+        except (IndexError, ValueError):
+            continue
+    return times
+
+
+def _read_log_tail(log_file: Path, max_lines: int = 80) -> list[str]:
+    if not log_file.exists():
+        return []
+    lines = log_file.read_text(encoding="utf-8", errors="ignore").splitlines()
+    return lines[-max_lines:]
 
 
 def _build_base_cmd(cfg: dict, run_dir: Path, k: int, seed: int):
@@ -102,9 +125,34 @@ def _run_one(task: dict) -> list:
             status = "failed"
 
     completed = _parse_completed_tasks(run_dir / "tasks.txt")
+    solver_times = _parse_solver_times(run_dir / "run.log")
+    planning_calls = len(solver_times)
+    total_solver_time = sum(solver_times) if solver_times else -1.0
+    mean_solver_time = (total_solver_time / planning_calls) if planning_calls else -1.0
     throughput = (completed / float(simulation_time)) if completed >= 0 else -1.0
+    raw = {
+        "mode": mode,
+        "num_agents": k,
+        "seed": seed,
+        "status": status,
+        "returncode": returncode,
+        "completed_tasks": completed,
+        "throughput_per_step": throughput,
+        "mean_solver_time": mean_solver_time,
+        "total_solver_time": total_solver_time,
+        "planning_calls": planning_calls,
+        "solver_times": solver_times,
+    }
+    if status != "ok":
+        raw["log_tail"] = _read_log_tail(run_dir / "run.log")
+    if task["cleanup_run_dir"] and run_dir.exists():
+        shutil.rmtree(run_dir)
     print(f"[{status}] mode={mode} k={k} seed={seed} completed={completed} throughput={throughput:.4f}")
-    return [mode, k, seed, status, returncode, completed, throughput, str(run_dir)]
+    row = [
+        mode, k, seed, status, returncode, completed, throughput,
+        mean_solver_time, total_solver_time, planning_calls,
+    ]
+    return row, raw
 
 
 def main():
@@ -142,21 +190,26 @@ def main():
     stamp = time.strftime("%Y%m%d_%H%M%S")
     out_root = output_root / f"rhcr_compare_{stamp}"
     out_root.mkdir(parents=True, exist_ok=True)
-    (out_root / "run_config_snapshot.json").write_text(json.dumps(cfg, indent=2), encoding="utf-8")
+    temp_root = out_root / "_tmp"
+    temp_root.mkdir(exist_ok=True)
+    cleanup_run_dir = bool(cfg.get("cleanup_run_dir", True))
 
     summary_path = out_root / "summary.csv"
+    raw_path = out_root / "runs_raw.jsonl"
     with summary_path.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["mode", "num_agents", "seed", "status", "returncode", "completed_tasks", "throughput_per_step", "run_dir"])
+        w.writerow([
+            "mode", "num_agents", "seed", "status", "returncode", "completed_tasks",
+            "throughput_per_step", "mean_solver_time", "total_solver_time", "planning_calls",
+        ])
 
     tasks = []
     mode = "learned"
     for k in agents:
         for seed in seeds:
-            run_dir = out_root / mode / f"agents_{k}" / f"seed_{seed}"
+            run_dir = temp_root / f"{mode}_agents_{k}_seed_{seed}"
             run_dir.mkdir(parents=True, exist_ok=True)
             cmd = _build_learned_cmd(cfg, run_dir, k, seed)
-            (run_dir / "command.sh").write_text(" ".join(cmd) + "\n", encoding="utf-8")
             tasks.append({
                 "mode": mode,
                 "k": k,
@@ -166,6 +219,7 @@ def main():
                 "repo_root": repo_root,
                 "simulation_time": cfg["simulation_time"],
                 "dry_run": bool(cfg.get("dry_run", False)),
+                "cleanup_run_dir": cleanup_run_dir,
             })
 
     print(f"Launching {len(tasks)} runs with num_process={num_process}")
@@ -179,11 +233,16 @@ def main():
             for fut in as_completed(futures):
                 rows.append(fut.result())
 
-    rows.sort(key=lambda r: (r[0], int(r[1]), int(r[2])))
+    rows.sort(key=lambda item: (item[0][0], int(item[0][1]), int(item[0][2])))
     with summary_path.open("a", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        for row in rows:
+        for row, _ in rows:
             w.writerow(row)
+    with raw_path.open("w", encoding="utf-8") as f:
+        for _, raw in rows:
+            f.write(json.dumps(raw, ensure_ascii=False) + "\n")
+    if cleanup_run_dir and temp_root.exists():
+        shutil.rmtree(temp_root)
 
     print(f"Done. Summary: {summary_path}")
 

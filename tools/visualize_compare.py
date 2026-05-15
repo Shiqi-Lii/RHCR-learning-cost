@@ -114,6 +114,8 @@ def main():
         df["num_agents"] = pd.to_numeric(df["num_agents"], errors="coerce").astype("Int64")
         df["seed"] = pd.to_numeric(df["seed"], errors="coerce").astype("Int64")
         df["throughput_per_step"] = pd.to_numeric(df["throughput_per_step"], errors="coerce")
+        if "mean_solver_time" in df.columns:
+            df["mean_solver_time"] = pd.to_numeric(df["mean_solver_time"], errors="coerce")
 
     parts = []
     for sim_w, plan_w in window_pairs:
@@ -123,10 +125,20 @@ def main():
             & (diff_df["planning_window"] == plan_w)
         ].copy()
         sub["algorithm"] = f"baseline sim={sim_w}, plan={plan_w}"
-        parts.append(sub[["algorithm", "num_agents", "seed", "throughput_per_step", "run_dir"]])
+        cols = ["algorithm", "num_agents", "seed", "throughput_per_step"]
+        if "mean_solver_time" in sub.columns:
+            cols.append("mean_solver_time")
+        if "run_dir" in sub.columns:
+            cols.append("run_dir")
+        parts.append(sub[cols])
     learned = cmp[(cmp["status"] == "ok") & (cmp["mode"] == "learned")].copy()
     learned["algorithm"] = "learned cost sim=1, plan=5"
-    parts.append(learned[["algorithm", "num_agents", "seed", "throughput_per_step", "run_dir"]])
+    cols = ["algorithm", "num_agents", "seed", "throughput_per_step"]
+    if "mean_solver_time" in learned.columns:
+        cols.append("mean_solver_time")
+    if "run_dir" in learned.columns:
+        cols.append("run_dir")
+    parts.append(learned[cols])
     df = pd.concat(parts, ignore_index=True)
 
     agg_thr = aggregate(df, "throughput_per_step")
@@ -143,16 +155,21 @@ def main():
     )
 
     runtime_rows = []
-    for _, row in df.iterrows():
-        times = parse_runlog_solver_times(Path(str(row["run_dir"])) / "run.log")
-        if not times:
-            continue
-        runtime_rows.append({
-            "algorithm": row["algorithm"],
-            "num_agents": int(row["num_agents"]),
-            "seed": int(row["seed"]),
-            "mean_solver_time": float(np.mean(times)),
-        })
+    if "mean_solver_time" in df.columns:
+        runtime_rows = df.dropna(subset=["mean_solver_time"])[
+            ["algorithm", "num_agents", "seed", "mean_solver_time"]
+        ].to_dict("records")
+    elif "run_dir" in df.columns:
+        for _, row in df.iterrows():
+            times = parse_runlog_solver_times(Path(str(row["run_dir"])) / "run.log")
+            if not times:
+                continue
+            runtime_rows.append({
+                "algorithm": row["algorithm"],
+                "num_agents": int(row["num_agents"]),
+                "seed": int(row["seed"]),
+                "mean_solver_time": float(np.mean(times)),
+            })
     rt = pd.DataFrame(runtime_rows)
     if rt.empty:
         raise RuntimeError("No runtime data parsed from run.log")

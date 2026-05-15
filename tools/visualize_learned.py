@@ -76,19 +76,24 @@ def main():
         df = pd.read_csv(run_dir / "summary.csv")
         if "mode" in df.columns:
             df = df[df["mode"] == "learned"].copy()
+        if "mean_solver_time" in df.columns:
+            df["mean_solver_time"] = pd.to_numeric(df["mean_solver_time"], errors="coerce")
         if df.empty:
             continue
         for _, row in df.iterrows():
             if str(row.get("status", "")) != "ok":
                 continue
-            path = Path(str(row["run_dir"]))
-            times = parse_solver_times(path / "run.log")
+            mean_solver_time = row.get("mean_solver_time", np.nan)
+            if pd.isna(mean_solver_time) and "run_dir" in row:
+                path = Path(str(row["run_dir"]))
+                times = parse_solver_times(path / "run.log")
+                mean_solver_time = float(np.mean(times)) if times else np.nan
             records.append({
                 "config": run_dir.name,
                 "num_agents": int(row["num_agents"]),
                 "seed": int(row["seed"]),
                 "throughput_per_step": float(row["throughput_per_step"]),
-                "mean_solver_time": float(np.mean(times)) if times else np.nan,
+                "mean_solver_time": float(mean_solver_time) if not pd.isna(mean_solver_time) else np.nan,
             })
 
     all_df = pd.DataFrame(records)
