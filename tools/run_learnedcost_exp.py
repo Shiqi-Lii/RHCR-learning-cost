@@ -111,7 +111,7 @@ def main():
     parser = argparse.ArgumentParser(description="RHCR learned-cost runner over agents x seeds.")
     parser.add_argument(
         "--runner_config",
-        default=str(Path(__file__).resolve().parent / "rhcr_eval_config.yaml"),
+        default=str(Path(__file__).resolve().parent / "run_learnedcost_exp.yaml"),
         help="Path to RHCR runner yaml config",
     )
     args = parser.parse_args()

@@ -1,0 +1,24 @@
+repo_root: /home/shiqi/masterarbeit
+lifelong_bin: RHCR/lifelong
+rhcr_map: RHCR/maps/room-64-64-8.map
+
+scenario: KIVA
+solver: PBS
+suboptimal_bound: 1.5
+dummy_paths: false
+simulation_time: 256
+
+agents: [96, 128, 160, 192, 224]
+seeds: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+
+window_pairs:
+  - [1, 5]
+  - [1, 10]
+  - [1, 20]
+  - [5, 5]
+  - [5, 10]
+  - [5, 20]
+
+num_process: 6
+output_root: RHCR/exp_diff_sim_plan
+dry_run: false

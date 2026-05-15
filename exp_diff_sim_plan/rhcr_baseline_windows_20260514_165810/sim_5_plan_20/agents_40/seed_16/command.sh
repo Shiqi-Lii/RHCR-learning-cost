@@ -1,0 +1,1 @@
+/home/shiqi/masterarbeit/RHCR/lifelong -m /home/shiqi/masterarbeit/RHCR/maps/pico_s00_od20_na32.map --scenario KIVA -k 40 --simulation_window 5 --planning_window 20 --solver PBS --seed 16 --simulation_time 256 --dummy_paths false --use_learned_cost false -o /home/shiqi/masterarbeit/RHCR/exp2/rhcr_baseline_windows_20260514_165810/sim_5_plan_20/agents_40/seed_16

@@ -1,0 +1,12 @@
+map: /home/shiqi/masterarbeit/RHCR/maps/pico_s00_od20_na32
+#drives: 24
+seed: 15
+solver: PBS
+time_limit: 60
+simulation_window: 1
+planning_window: 10
+simulation_time: 256
+robust: 0
+rotate: 0
+use_dummy_paths: 0
+hold_endpoints: 0

@@ -1,0 +1,27 @@
+repo_root: /home/shiqi/masterarbeit
+lifelong_bin: RHCR/lifelong
+rhcr_map: RHCR/maps/room_v2.map
+
+scenario: KIVA
+solver: PBS
+simulation_window: 1
+planning_window: 5
+simulation_time: 256
+dummy_paths: false
+suboptimal_bound: 1.5
+
+agents: [ 192 ]
+seeds: [10]
+num_process: 1
+
+output_root: /home/shiqi/masterarbeit/RHCR/exp_learned/rhcr_eval_runs
+dry_run: false
+
+learned_cost_python: /home/shiqi/miniconda3/envs/ltf/bin/python
+learned_cost:
+  ckpt: learn-to-follow/costmap/outputs/room_v2_outputs/20260424_133933/best_model.pt
+  weight: 1.0
+  gaussian_sigma: 0.8
+  pred_bias: 0.05
+  gaussian_ksize: 5
+  normalize: false
