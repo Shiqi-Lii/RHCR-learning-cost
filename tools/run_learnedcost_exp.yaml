@@ -10,9 +10,9 @@ simulation_time: 256
 dummy_paths: false
 suboptimal_bound: 1.5
 
-agents: [ 192 ]
-seeds: [10]
-num_process: 1
+agents: [96, 128, 160, 192, 224]
+seeds: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+num_process: 6
 
 output_root: /home/shiqi/masterarbeit/RHCR/exp_learned/rhcr_eval_runs
 dry_run: false

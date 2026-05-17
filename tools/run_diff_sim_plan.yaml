@@ -1,6 +1,6 @@
 repo_root: /home/shiqi/masterarbeit
 lifelong_bin: RHCR/lifelong
-rhcr_map: RHCR/maps/pico_s00_od20_na32.map
+rhcr_map: RHCR/maps/room_v2.map
 
 scenario: KIVA
 solver: PBS
@@ -8,8 +8,8 @@ suboptimal_bound: 1.5
 dummy_paths: false
 simulation_time: 256
 
-agents: [24, 32,]
-seeds: [10, 11, 12, ]
+agents: [96, 128, 160, 192, 224]
+seeds: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
 
 window_pairs:
   - [1, 5]
