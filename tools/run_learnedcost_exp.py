@@ -89,6 +89,8 @@ def _build_learned_cmd(cfg: dict, run_dir: Path, k: int, seed: int):
     lc = cfg.get("learned_cost", {})
     cmd = _build_base_cmd(cfg, run_dir, k, seed)
     cmd.extend(["--use_learned_cost", "true"])
+    if cfg.get("learned_cost_python"):
+        cmd.extend(["--learned_cost_python", str(cfg["learned_cost_python"])])
     cmd.extend(["--learned_cost_ckpt", str(lc["ckpt"])])
     if "weight" in lc:
         cmd.extend(["--learned_cost_weight", str(float(lc["weight"]))])
@@ -186,6 +188,8 @@ def main():
     # Resolve paths
     cfg["lifelong_bin"] = str((repo_root / cfg["lifelong_bin"]).resolve()) if not str(cfg["lifelong_bin"]).startswith("/") else cfg["lifelong_bin"]
     cfg["rhcr_map"] = str((repo_root / cfg["rhcr_map"]).resolve()) if not str(cfg["rhcr_map"]).startswith("/") else cfg["rhcr_map"]
+    if cfg.get("learned_cost_python"):
+        cfg["learned_cost_python"] = str((repo_root / cfg["learned_cost_python"]).resolve()) if not str(cfg["learned_cost_python"]).startswith("/") else cfg["learned_cost_python"]
     cfg["learned_cost"]["ckpt"] = str((repo_root / cfg["learned_cost"]["ckpt"]).resolve()) if not str(cfg["learned_cost"]["ckpt"]).startswith("/") else cfg["learned_cost"]["ckpt"]
     stamp = time.strftime("%Y%m%d_%H%M%S")
     out_root = output_root / f"rhcr_compare_{stamp}"

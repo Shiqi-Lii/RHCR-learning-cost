@@ -18,7 +18,7 @@ output_root: /home/shiqi/masterarbeit/RHCR/exp_learned/rhcr_eval_runs
 dry_run: false
 cleanup_run_dir: true
 
-learned_cost_python: /home/shiqi/miniconda3/envs/ltf/bin/python
+learned_cost_python: /home/shiqi/miniconda3/envs/ltf/bin/python3
 learned_cost:
   ckpt: learn-to-follow/costmap/outputs/room_v2_outputs/20260424_133933/best_model.pt
   weight: 1.0
