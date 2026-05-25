@@ -1,6 +1,22 @@
 repo_root: /home/shiqi/masterarbeit
 lifelong_bin: RHCR/lifelong
-rhcr_map: RHCR/maps/room_v2.map
+
+# rhcr_map: RHCR/maps/room-64-64-8.map
+# agents: [ 96, 128, 160, 192, 224]
+
+rhcr_map: RHCR/maps/wfi_warehouse.map
+agents: [ 32, 64, 96, 128, 160, 192]
+
+learned_cost:
+  # ckpt: learn-to-follow/costmap/outputs/room-64-64-8_outputs/20260424_133748/best_model.pt
+  ckpt: learn-to-follow/costmap/outputs/warehouse_outputs/20260424_133433/best_model.pt
+  weight: 1.0
+  gaussian_sigma: 0.8
+  pred_bias: 0.00
+  gaussian_ksize: 5
+  normalize: false
+
+seeds: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
 
 scenario: KIVA
 solver: PBS
@@ -10,19 +26,11 @@ simulation_time: 256
 dummy_paths: false
 suboptimal_bound: 1.5
 
-agents: [96, 128, 160, 192, 224]
-seeds: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+
 num_process: 6
 
-output_root: /home/shiqi/masterarbeit/RHCR/exp_learned/rhcr_eval_runs
+output_root: /home/shiqi/masterarbeit/RHCR/exp_learned/
 dry_run: false
 cleanup_run_dir: true
 
 learned_cost_python: /home/shiqi/miniconda3/envs/ltf/bin/python3
-learned_cost:
-  ckpt: learn-to-follow/costmap/outputs/room_v2_outputs/20260424_133933/best_model.pt
-  weight: 1.0
-  gaussian_sigma: 0.8
-  pred_bias: 0.05
-  gaussian_ksize: 5
-  normalize: false

@@ -1,6 +1,11 @@
 repo_root: /home/shiqi/masterarbeit
 lifelong_bin: RHCR/lifelong
-rhcr_map: RHCR/maps/room_v2.map
+
+# rhcr_map: RHCR/maps/room-64-64-8.map
+# agents: [ 96, 128, 160, 192, 224]
+
+rhcr_map: RHCR/maps/wfi_warehouse.map
+agents: [ 32, 64, 96, 128, 160, 192]
 
 scenario: KIVA
 solver: PBS
@@ -8,7 +13,7 @@ suboptimal_bound: 1.5
 dummy_paths: false
 simulation_time: 256
 
-agents: [96, 128, 160, 192, 224]
+
 seeds: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
 
 window_pairs:
