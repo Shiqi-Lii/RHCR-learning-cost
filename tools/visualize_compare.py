@@ -45,6 +45,12 @@ def aggregate(df, metric: str):
     return agg
 
 
+def save_recomputed_summary(agg, out_csv: Path):
+    cols = ["algorithm", "num_agents", "mean", "std", "ci95"]
+    agg[cols].to_csv(out_csv, index=False)
+    print(f"Saved: {out_csv}")
+
+
 def latest_summary_dir(root: Path) -> Path:
     candidates = sorted(d for d in root.iterdir() if d.is_dir() and (d / "summary.csv").exists())
     if not candidates:
@@ -52,7 +58,18 @@ def latest_summary_dir(root: Path) -> Path:
     return candidates[-1]
 
 
-def plot_lines(agg, order, metric_label: str, title: str, out_pdf: Path, fig_w: float, fig_h: float, line_w: float):
+def plot_lines(
+    agg,
+    order,
+    metric_label: str,
+    out_pdf: Path,
+    fig_w: float,
+    fig_h: float,
+    line_w: float,
+    label_fontsize: float,
+    tick_fontsize: float,
+    legend_fontsize: float,
+):
     plt.figure(figsize=(fig_w, fig_h))
     for algo in order:
         sub = agg[agg["algorithm"] == algo].sort_values("num_agents")
@@ -62,16 +79,16 @@ def plot_lines(agg, order, metric_label: str, title: str, out_pdf: Path, fig_w: 
         y = sub["mean"].tolist()
         ci = sub["ci95"].fillna(0).tolist()
         color = COLOR_MAP.get(algo)
-        plt.plot(x, y, marker="o", linewidth=line_w, label=algo, color=color)
+        plt.plot(x, y, marker="o", markersize=5, linewidth=line_w, label=algo, color=color)
         plt.fill_between(x, [yy - cc for yy, cc in zip(y, ci)], [yy + cc for yy, cc in zip(y, ci)], alpha=0.18, color=color)
     xticks = sorted(int(v) for v in agg["num_agents"].dropna().unique().tolist())
     if xticks:
         plt.xticks(xticks)
-    plt.title(title)
-    plt.xlabel("agent_num")
-    plt.ylabel(metric_label)
+    plt.xlabel("Number of Agents", fontsize=label_fontsize)
+    plt.ylabel(metric_label, fontsize=label_fontsize)
+    plt.tick_params(axis="both", labelsize=tick_fontsize)
     plt.grid(alpha=0.3)
-    plt.legend(fontsize=8)
+    plt.legend(loc="upper left", fontsize=legend_fontsize)
     plt.tight_layout()
     plt.savefig(out_pdf)
     print(f"Saved: {out_pdf}")
@@ -88,6 +105,9 @@ def main():
     parser.add_argument("--fig_w", type=float, default=6.0)
     parser.add_argument("--fig_h", type=float, default=5.0)
     parser.add_argument("--line_w", type=float, default=2.0)
+    parser.add_argument("--label_fontsize", type=float, default=16.0)
+    parser.add_argument("--tick_fontsize", type=float, default=14.0)
+    parser.add_argument("--legend_fontsize", type=float, default=13.0)
     args = parser.parse_args()
 
     global np, pd, plt
@@ -143,15 +163,21 @@ def main():
 
     agg_thr = aggregate(df, "throughput_per_step")
     print(agg_thr.sort_values(["num_agents", "algorithm"]).to_string(index=False))
+    save_recomputed_summary(
+        agg_thr,
+        cmp_dir / "recomputed_summary_avg_throughput.csv",
+    )
     plot_lines(
         agg_thr,
         order,
-        "throughput_per_step",
-        "RHCR Combined: learned + baseline(sim/plan variants)",
+        "Average Throughput",
         cmp_dir / "combined_diff_sim_plan_vs_learned.pdf",
         args.fig_w,
         args.fig_h,
         args.line_w,
+        args.label_fontsize,
+        args.tick_fontsize,
+        args.legend_fontsize,
     )
 
     runtime_rows = []
@@ -174,15 +200,21 @@ def main():
     if rt.empty:
         raise RuntimeError("No runtime data parsed from run.log")
     agg_time = aggregate(rt, "mean_solver_time")
+    save_recomputed_summary(
+        agg_time,
+        cmp_dir / "recomputed_summary_runtime_per_step.csv",
+    )
     plot_lines(
         agg_time,
         order,
-        "time (s)",
-        "Compute Time Comparison (mean per planning call)",
+        "Average Runtime Per Step (s)",
         cmp_dir / "combined_compute_time_all_curves.pdf",
         args.fig_w,
         args.fig_h,
         args.line_w,
+        args.label_fontsize,
+        args.tick_fontsize,
+        args.legend_fontsize,
     )
 
 

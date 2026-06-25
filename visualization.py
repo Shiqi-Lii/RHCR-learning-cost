@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 import csv
 import numpy as np
@@ -7,26 +6,14 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 
-# =========================
-# User Config
-# =========================
-# MAP_FILE = "maps/sorting_map.grid"   # RHCR graph-map CSV file
-MAP_FILE = "maps/wfi_warehouse.map"   # RHCR graph-map CSV file
-PATHS_FILE = "/home/shiqi/masterarbeit/exp/wfi_learned_seed0/paths.txt"             # RHCR output paths
-# 可选：只播放前多少步（None 表示全长）
+MAP_FILE = "maps/wfi_warehouse.map"
+PATHS_FILE = "/home/shiqi/masterarbeit/exp/wfi_learned_seed0/paths.txt"
 MAX_STEPS = None
 
-# 动画设置
-FRAME_STRIDE = 1       # 每隔多少 timestep 画一帧（5000步建议 5~20）
-INTERVAL_MS = 100       # 每帧间隔（毫秒）
-AGENT_SIZE = 30         # agent 点大小
-SHOW_AGENT_IDS = False  # True: 在点旁边显示 agent id（多 agent 时会很乱）
-
-
-
-# =========================
-# Detect & Load Map
-# =========================
+FRAME_STRIDE = 1
+INTERVAL_MS = 100
+AGENT_SIZE = 30
+SHOW_AGENT_IDS = False
 
 def detect_map_type(path):
     """Return 'rhcr_graph_grid' or 'ascii_map'."""
@@ -34,11 +21,9 @@ def detect_map_type(path):
         head = [f.readline().strip().replace("\r", "") for _ in range(10)]
     head = [ln for ln in head if ln != ""]
 
-    # RHCR graph grid: contains "Grid size (x, y)" and "id,type,station"
     if any(ln.lower().startswith("grid size") for ln in head) or any("id,type,station" in ln.lower() for ln in head):
         return "rhcr_graph_grid"
 
-    # ASCII map: first line like "33,46" and then many lines of . @ r e ...
     if len(head) >= 1 and "," in head[0]:
         parts = head[0].split(",")
         if len(parts) == 2 and parts[0].strip().isdigit() and parts[1].strip().isdigit():
@@ -98,38 +83,23 @@ def load_rhcr_graph_grid(path):
 
 
 def load_ascii_map(path):
-    """
-    Robust parser for custom ASCII .map:
-      W,H
-      (some metadata lines...)
-      H lines of grid, each length ~ W, chars like . @ r e ...
-    """
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         raw_all = [ln.rstrip("\n").replace("\r", "") for ln in f]
 
-    # drop completely empty lines
     raw_all = [ln for ln in raw_all if ln.strip() != ""]
 
-    # RHCR .map first line is rows,cols
     rows_str, cols_str = [p.strip() for p in raw_all[0].split(",")]
     rows, cols = int(rows_str), int(cols_str)
     H, W = rows, cols
 
-    # Heuristic: find first "grid-like" line after header.
-    # Grid lines usually:
-    # - have length close to W
-    # - contain mostly characters in a small alphabet: . @ r e (and sometimes s,g,E,R etc.)
-    allowed = set(".@reREsgSG0123456789-_*# ")  # slightly permissive
+    allowed = set(".@reREsgSG0123456789-_*# ")
     start = None
     for i in range(1, len(raw_all)):
         ln = raw_all[i]
-        # must be near width (allow a bit of deviation)
         if len(ln) < max(5, W - 2):
             continue
-        # check allowed ratio
         bad = sum(ch not in allowed for ch in ln)
         if bad <= max(2, len(ln) // 20):
-            # also require at least some '.' or '@' which are typical in maps
             if ('.' in ln) or ('@' in ln) or ('r' in ln) or ('e' in ln) or ('R' in ln) or ('E' in ln):
                 start = i
                 break
@@ -143,13 +113,9 @@ def load_ascii_map(path):
             f"Using H={len(grid_lines)} for visualization.")
         H = len(grid_lines)
 
-
-    # Normalize each row to length W
     grid_lines = [ln.ljust(W, ".")[:W] for ln in grid_lines]
 
     occ = np.zeros((H, W), dtype=np.uint8)
-    # RHCR .map uses vertex ids over ALL cells in row-major order:
-    # id = y * W + x (including obstacles).
     id2xy = {}
     for y in range(H):
         for x in range(W):
@@ -163,9 +129,6 @@ def load_ascii_map(path):
 
 
 
-# =========================
-# Load Paths
-# =========================
 def load_paths(paths_file):
     with open(paths_file, "r", encoding="utf-8", errors="ignore") as f:
         n = int(f.readline().strip())
@@ -209,9 +172,6 @@ def load_paths(paths_file):
     return paths
 
 
-# =========================
-# Animate
-# =========================
 def main():
     mtype = detect_map_type(MAP_FILE)
     if mtype == "rhcr_graph_grid":
@@ -233,7 +193,6 @@ def main():
     print("known nodes:", len(id2xy))
     print("paths v_max:", int(paths.max()))
 
-    # quick missing check
     sample = paths.flatten()[:: max(1, (paths.size // 2000))]
     missing = sum(int(v) not in id2xy for v in sample)
     print("sample missing vertex IDs:", missing, "/", len(sample))
@@ -243,7 +202,7 @@ def main():
     ax.set_xlim(-0.5, W - 0.5)
     ax.set_ylim(H - 0.5, -0.5)
 
-    ax.imshow(occ, interpolation="nearest")  # 1=obstacle, 0=free
+    ax.imshow(occ, interpolation="nearest")
 
     scat = ax.scatter([], [], s=AGENT_SIZE, c="red", edgecolors="white", linewidths=0.3)
 
@@ -272,7 +231,6 @@ def main():
         ax.set_title(f"t={t}  stride={FRAME_STRIDE}")
         return (scat, *texts) if SHOW_AGENT_IDS else (scat,)
 
-    # Keep a strong reference to avoid GC stopping animation on some backends.
     ani = FuncAnimation(
         fig,
         update,
